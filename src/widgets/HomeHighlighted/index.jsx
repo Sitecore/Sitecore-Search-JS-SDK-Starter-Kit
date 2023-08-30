@@ -6,14 +6,16 @@ import { ArticleCard, ArticleCardContent, ArticleCardImage } from './styled';
 
 export const HomeHighlightedComponent = () => {
   const {
+    widgetRef,
     queryResult: { data: { content: articles = [] } = {} },
-  } = useSearchResults((query) => {
-    query.getRequest().setSearchFilter(new FilterEqual('type', 'Blogs'));
-    return {};
+  } = useSearchResults({
+    query: (query) => {
+      query.getRequest().setSearchFilter(new FilterEqual('type', 'Blogs'));
+    },
   });
   const articlesToShow = articles.slice(0, 3);
   return (
-    <Row>
+    <Row ref={widgetRef}>
       {articlesToShow.map((a, index) => (
         <ArticleCard key={`${a.id}-${index}`}>
           <ArticleCardContent>
