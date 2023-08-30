@@ -33,11 +33,12 @@ export const SearchResults = ({
   defaultSortType = 'featured_desc',
   defaultPage = 1,
   defaultKeyphrase = '',
-  defaultProductsPerPage = 24,
+  defaultItemsPerPage = 24,
 }) => {
   const { language } = useContext(LanguageContext);
   const navigate = useNavigate();
   const {
+    widgetRef,
     actions: {
       onResultsPerPageChange,
       onPageNumberChange,
@@ -47,25 +48,27 @@ export const SearchResults = ({
       onFacetClick,
       onClearFilters,
     },
-    context: { sortType = defaultSortType, page = defaultPage, itemsPerPage = defaultProductsPerPage },
+    state: { page, itemsPerPage },
     queryResult: {
       isLoading,
       isFetching,
       data: {total_item: totalItems = 0, facet: facets = [], content: articles = [] } = {},
     },
-  } = useSearchResults((query) => {
-    query
-      .getRequest()
-      .setSearchQueryHighlightFragmentSize(500)
-      .setSearchQueryHighlightFields(['subtitle', 'description'])
-      .setSearchQueryHighlightPreTag(HIGHLIGHT_DATA.pre)
-      .setSearchQueryHighlightPostTag(HIGHLIGHT_DATA.post);
-    return {
-      sortType,
-      page,
-      itemsPerPage,
-      keyphrase: defaultKeyphrase,
-    };
+  } = useSearchResults({
+      query: (query) => {
+        query
+          .getRequest()
+          .setSearchQueryHighlightFragmentSize(500)
+          .setSearchQueryHighlightFields(['subtitle', 'description'])
+          .setSearchQueryHighlightPreTag(HIGHLIGHT_DATA.pre)
+          .setSearchQueryHighlightPostTag(HIGHLIGHT_DATA.post);
+      },
+      state: {
+        sortType: defaultSortType,
+          page: defaultPage,
+          itemsPerPage: defaultItemsPerPage,
+          keyphrase: defaultKeyphrase,
+      },
   });
   const totalPages = Math.ceil(totalItems / (itemsPerPage !== 0 ? itemsPerPage : 1));
   const selectedFacetsFromApi = useSearchResultsSelectedFacets();
@@ -93,7 +96,7 @@ export const SearchResults = ({
       )}
       {!isLoading && (
         <>
-          <SearchResultsLayout.MainArea>
+          <SearchResultsLayout.MainArea ref={widgetRef}>
             {isFetching && (
               <LoaderContainer>
                 <Presence present={true}>
@@ -274,7 +277,7 @@ export const SearchResults = ({
                 <div>
                   <label>Results Per Page</label>
                   <SelectStyled.Root
-                    defaultValue={String(defaultProductsPerPage)}
+                    defaultValue={String(defaultItemsPerPage)}
                     onValueChange={(v) => onResultsPerPageChange({ numItems: Number(v) })}
                   >
                     <SelectStyled.Trigger>
@@ -341,7 +344,7 @@ export const SearchResults = ({
 SearchResults.propTypes = {
   defaultSortType: PropTypes.string,
   defaultPage: PropTypes.number,
-  defaultProductsPerPage: PropTypes.number,
+  defaultItemsPerPage: PropTypes.number,
   defaultKeyphrase: PropTypes.string,
 };
 

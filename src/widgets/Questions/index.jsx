@@ -35,6 +35,7 @@ FrequentQuestion.propTypes = {
 
 const QuestionsComponent = ({ keyphrase = '', defaultRelatedQuestions = 4 }) => {
   const {
+    widgetRef,
     queryResult: {
       data: {
         related_questions: relatedQuestionsResponse = [],
@@ -44,16 +45,16 @@ const QuestionsComponent = ({ keyphrase = '', defaultRelatedQuestions = 4 }) => 
         },
       } = {},
     },
-  } = useQuestions(() => {
-    return {
+  } = useQuestions({
+    state: {
       keyphrase,
       relatedQuestions: defaultRelatedQuestions,
-    };
+    },
   });
   return (
     <>
       {answer && question && (
-        <AnswerAreaWrapper>
+        <AnswerAreaWrapper ref={widgetRef}>
           <PrimaryQuestionBox>
             <PrimaryQuestionBoxTitle>{question}</PrimaryQuestionBoxTitle>
             <PrimaryQuestionBoxAnswer>{answer}</PrimaryQuestionBoxAnswer>

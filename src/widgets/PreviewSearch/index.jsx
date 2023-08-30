@@ -150,7 +150,8 @@ const getGroupId = (name, value) => `${name}@${value}`;
 
 export const PreviewSearchComponent = ({ defaultProductsPerPage = 6 }) => {
   const {
-    context: { itemsPerPage = defaultProductsPerPage, keyphrase = '' },
+    widgetRef,
+    state: { keyphrase },
     actions: { onItemClick, onKeyphraseChange },
     queryResult: {
       isFetching,
@@ -162,19 +163,20 @@ export const PreviewSearchComponent = ({ defaultProductsPerPage = 6 }) => {
         } = {},
       } = {},
     },
-  } = usePreviewSearch((query) => {
-    query
-      .getRequest()
-      .setSearchQueryHighlightFragmentSize(500)
-      .setSearchQueryHighlightFields(['title', 'description'])
-      .setSearchQueryHighlightPreTag(HIGHLIGHT_DATA.pre)
-      .setSearchQueryHighlightPostTag(HIGHLIGHT_DATA.post);
-    return {
-      suggestionsList: [
-        { suggestion: 'title_context_aware', max: 10 },
-      ],
-      itemsPerPage,
-    };
+  } = usePreviewSearch({
+    query: (query) => {
+      query
+        .getRequest()
+        .setSearchQueryHighlightFragmentSize(500)
+        .setSearchQueryHighlightFields(['title', 'description'])
+        .setSearchQueryHighlightPreTag(HIGHLIGHT_DATA.pre)
+        .setSearchQueryHighlightPostTag(HIGHLIGHT_DATA.post);
+    },
+    state: {
+      suggestionsList: [{ suggestion: 'title_context_aware', max: 10 }],
+        itemsPerPage: defaultProductsPerPage,
+        keyphrase: '',
+    },
   });
 
   const loading = isLoading || isFetching;
@@ -234,7 +236,7 @@ export const PreviewSearchComponent = ({ defaultProductsPerPage = 6 }) => {
               </LoaderContainer>
             </Presence>
             {!loading && (
-              <NavMenuStyled.SubContent orientation="vertical" value={activeItem}>
+              <NavMenuStyled.SubContent orientation="vertical" value={activeItem} ref={widgetRef}>
                 <NavMenuStyled.GroupList>
                   {articleSuggestions.length > 0 && (
                     <Group

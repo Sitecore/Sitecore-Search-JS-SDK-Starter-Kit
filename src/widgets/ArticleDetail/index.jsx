@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
 
 export const ArticleDetailComponent = ({ id }) => {
   const {
+    widgetRef,
     queryResult: { data: { content: articles = [] } = {} },
   } = useSearchResults((query) => {
     const equalFilter = new FilterEqual('id', id);
@@ -28,7 +29,7 @@ export const ArticleDetailComponent = ({ id }) => {
     mainArticle = articles[0];
   }
   return (
-    <DetailWrapper>
+    <DetailWrapper ref={widgetRef}>
       <DetailHeader>
         <DetailHeaderContent>
           <DetailHeaderTitle>{mainArticle.title}</DetailHeaderTitle>
