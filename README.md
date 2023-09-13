@@ -64,7 +64,7 @@ The following picture shows a sample configuration:
 
 #### Sorting options
 
-Sorting options must include `featured_desc` and `feature_asc` criteria pre-configured. The picture shows how it should look on CEC:
+Sorting options must include `featured_desc` and `featured_asc` criteria pre-configured. The picture shows how it should look on CEC:
 
 ![Sorting options](https://developers.sitecorecloud.io/search-sdk/sorting-options.png)
 
