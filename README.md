@@ -68,6 +68,8 @@ Sorting options must include `featured_desc` and `featured_asc` criteria pre-con
 
 ![Sorting options](https://developers.sitecorecloud.io/search-sdk/sorting-options.png)
 
+Remember to reindex the relevant sources after configuring a new sorting option.
+
 #### Pre configured widgets
 
 The account must have the following widgets created before:
