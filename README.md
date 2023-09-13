@@ -100,7 +100,7 @@ VITE_SEARCH_PATH=<Path for the site> (optional)
 ```
 
 5.  To start the development server, run `npm run dev`.
-6.  To view the site, open your browser to **http://localhost:5174**
+6.  To view the site, open your browser to **http://localhost:5173**
 7.  To build the app for production, run: `npm run build`
 
 ## Pages
