@@ -16,13 +16,15 @@ export const ArticleDetailComponent = ({ id }) => {
   const {
     widgetRef,
     queryResult: { data: { content: articles = [] } = {} },
-  } = useSearchResults((query) => {
-    const equalFilter = new FilterEqual('id', id);
-    console.log(equalFilter.toJson());
-    query.getRequest().setSearchFilter(equalFilter);
-    return {
-      itemsPerPage: 1,
-    };
+  } = useSearchResults({
+      query: (query) => {
+        const equalFilter = new FilterEqual('id', id);
+        console.log(equalFilter.toJson());
+        query.getRequest().setSearchFilter(equalFilter);
+	  },
+	  state: {
+		itemsPerPage: 1,
+	  },
   });
   let mainArticle = { id: '', title: '' };
   if (articles.length > 0) {
