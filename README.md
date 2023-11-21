@@ -64,9 +64,11 @@ The following picture shows a sample configuration:
 
 #### Sorting options
 
-Sorting options must include `featured_desc` and `feature_asc` criteria pre-configured. The picture shows how it should look on CEC:
+Sorting options must include `featured_desc` and `featured_asc` criteria pre-configured. The picture shows how it should look on CEC:
 
 ![Sorting options](https://developers.sitecorecloud.io/search-sdk/sorting-options.png)
+
+Remember to reindex the relevant sources after configuring a new sorting option.
 
 #### Pre configured widgets
 
@@ -100,7 +102,7 @@ VITE_SEARCH_PATH=<Path for the site> (optional)
 ```
 
 5.  To start the development server, run `npm run dev`.
-6.  To view the site, open your browser to **http://localhost:5174**
+6.  To view the site, open your browser to **http://localhost:5173**
 7.  To build the app for production, run: `npm run build`
 
 ## Pages
