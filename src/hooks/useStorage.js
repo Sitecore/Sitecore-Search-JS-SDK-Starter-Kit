@@ -4,7 +4,7 @@ export default (key, initialValue) => {
   const [storedValue, setStoredValue] = useState(() => {
     try {
       const item = typeof window !== 'undefined' && window.localStorage.getItem(key);
-      return item || initialValue;
+      return item ? JSON.parse(item) : initialValue;
     } catch (error) {
       return initialValue;
     }
@@ -14,7 +14,7 @@ export default (key, initialValue) => {
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
-      window.localStorage.setItem(key, valueToStore);
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
     } catch (error) {
       console.error(error);
     }

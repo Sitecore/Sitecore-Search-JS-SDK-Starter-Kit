@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DarkModeSwitch } from 'react-toggle-dark-mode';
 
-import { ThemeContext } from '../../contexts/theme-context.js';
+import { ThemeContext } from '../../contexts/themeContext.js';
 import HeaderInput from '../HeaderInput/index.jsx';
 import Logo from '../Icons/Logo.jsx';
 import LocaleSelector from '../LocaleSelector/index.jsx';
