@@ -50,7 +50,6 @@ function App() {
                 env={DISCOVER_CONFIG.env}
                 customerKey={DISCOVER_CONFIG.customerKey}
                 apiKey={DISCOVER_CONFIG.apiKey}
-                useToken
                 publicSuffix={true}
               >
                 <SEOWidget rfkId={'search_seo'} />
