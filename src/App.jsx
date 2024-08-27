@@ -1,70 +1,57 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import Footer from '@/components/Footer/index.jsx';
+import Header from '@/components/Header/index.jsx';
+import { LanguageContext } from '@/contexts/languageContext.js';
+import useLanguage from '@/hooks/useLanguage.js';
+import '@/index.css';
+import ArticleDetail from '@/pages/ArticleDetail.jsx';
+import Home from '@/pages/Home.jsx';
+import Search from '@/pages/Search.jsx';
 import { SEOWidget, WidgetsProvider } from '@sitecore-search/react';
-import { createTheme } from '@sitecore-search/ui';
-
-import { LanguageContext } from './contexts/languageContext.js';
-import { ThemeContext } from './contexts/themeContext.js';
-import ArticleDetail from './pages/ArticleDetail.jsx';
-import Footer from './components/Footer/index.jsx';
-import Header from './components/Header/index.jsx';
-import useLanguage from './hooks/useLanguage';
-import lightTheme from './themes/light.json';
-import darkTheme from './themes/dark.json';
-import { GlobalStyle } from './styled.js';
-import Search from './pages/Search.jsx';
-import useTheme from './hooks/useTheme';
-import Home from './pages/Home.jsx';
-
-function getTheme(theme) {
-  if (theme === 'light') {
-    return lightTheme;
-  }
-  return darkTheme;
-}
 
 /**
- * Configuration object for discover settings.
+ * Configuration object for search settings.
  * It uses Vite environment variables.
  * @see https://vitejs.dev/guide/env-and-mode.html
  */
-const DISCOVER_CONFIG = {
+const SEARCH_CONFIG = {
   env: import.meta.env.VITE_SEARCH_ENV,
   customerKey: import.meta.env.VITE_SEARCH_CUSTOMER_KEY,
   apiKey: import.meta.env.VITE_SEARCH_API_KEY,
 };
 
+console.log(SEARCH_CONFIG);
+
 function App() {
   const { language, setLanguage } = useLanguage();
-  const { theme, setTheme } = useTheme();
-  const { style } = createTheme(getTheme(theme));
-
   return (
     <>
-      <GlobalStyle />
-      <ThemeContext.Provider value={{ theme, setTheme }}>
-        <LanguageContext.Provider value={{ language, setLanguage }}>
-          <BrowserRouter basename={import.meta.env.VITE_SEARCH_PATH}>
-            <div className="App" style={style}>
-              <WidgetsProvider
-                env={DISCOVER_CONFIG.env}
-                customerKey={DISCOVER_CONFIG.customerKey}
-                apiKey={DISCOVER_CONFIG.apiKey}
-                publicSuffix={true}
-              >
-                <SEOWidget rfkId={'search_seo'} />
-                <Header />
+      <LanguageContext.Provider value={{ language, setLanguage }}>
+
+      <BrowserRouter>
+          <div className="bg-white dark:bg-gray-700">
+
+            <WidgetsProvider
+              env={SEARCH_CONFIG.env}
+              customerKey={SEARCH_CONFIG.customerKey}
+              apiKey={SEARCH_CONFIG.apiKey}
+              publicSuffix={true}
+            >
+              <SEOWidget rfkId={'demo_search_seo'} />
+              <Header />
+              <main className="w-full m-auto pt-[100px] min-h-[700px] bg-white dark:bg-gray-700">
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/search" element={<Search />} />
                   <Route path="/detail/:id" element={<ArticleDetail />}></Route>
                 </Routes>
-                <Footer />
-              </WidgetsProvider>
-            </div>
-          </BrowserRouter>
-        </LanguageContext.Provider>
-      </ThemeContext.Provider>
+              </main>
+              <Footer />
+            </WidgetsProvider>
+          </div>
+        </BrowserRouter>
+      </LanguageContext.Provider>
     </>
   );
 }

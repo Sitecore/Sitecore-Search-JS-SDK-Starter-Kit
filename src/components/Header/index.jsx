@@ -1,36 +1,24 @@
-import { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { DarkModeSwitch } from 'react-toggle-dark-mode';
+import { Link } from 'react-router-dom';
 
-import { ThemeContext } from '../../contexts/themeContext.js';
-import HeaderInput from '../HeaderInput/index.jsx';
-import Logo from '../Icons/Logo.jsx';
-import LocaleSelector from '../LocaleSelector/index.jsx';
-import { HeaderContent, HeaderContentWrapper, HeaderWrapper } from './styled';
+import { DarkmodeSwitch } from '@/components/DarkModeSwitcher';
+import LocaleSelector from '@/components/LocaleSelector/index.jsx';
+import Logo from '@/components/Logo/index.jsx';
+import PreviewSearch from '@/widgets/PreviewSearch/index.jsx';
 
 const Header = () => {
-  const navigate = useNavigate();
-  const { theme, setTheme } = useContext(ThemeContext);
-  const toggleDarkMode = (checked) => {
-    if (checked) {
-      setTheme('dark');
-    } else {
-      setTheme('light');
-    }
-  };
   return (
-    <HeaderWrapper>
-      <HeaderContentWrapper>
-        <HeaderContent>
-          <a href="#" onClick={() => navigate(``)} tabIndex={1}>
+    <div className="header-outer">
+      <div className="header-inner">
+        <div className="flex items-center justify-between">
+          <Link to="/" tabIndex={1}>
             <Logo />
-          </a>
-          <HeaderInput />
-          <DarkModeSwitch checked={theme === 'dark'} onChange={toggleDarkMode} />
+          </Link>
+          <PreviewSearch rfkId="rfkid_6" defaultItemsPerPage={6} />
+          <DarkmodeSwitch />
           <LocaleSelector />
-        </HeaderContent>
-      </HeaderContentWrapper>
-    </HeaderWrapper>
+        </div>
+      </div>
+    </div>
   );
 };
 

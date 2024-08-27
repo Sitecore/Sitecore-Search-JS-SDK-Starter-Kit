@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom/client';
 
 import { Logger } from '@sitecore-search/react';
 
-import App from './App';
+import App from '@/App.jsx';
 
 Logger.setLogLevel('debug');
 

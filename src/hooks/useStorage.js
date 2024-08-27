@@ -1,6 +1,15 @@
 import { useState } from 'react';
 
-export default (key, initialValue) => {
+/**
+ * Custom hook for storing and retrieving values in local storage.
+ *
+ * @template T - The type of the value to be stored.
+ * @param {string} key - The key used to identify the stored value.
+ * @param {T} initialValue - The initial value to be stored if no value is found in local storage.
+ * @returns {[T, (value: T) => void]} - An array containing the stored value and a function to update the stored value.
+ * @example const [language, setLanguage] = useStorage<Language>('lang', 'en');
+ */
+function useStorage(key, initialValue) {
   const [storedValue, setStoredValue] = useState(() => {
     try {
       const item = typeof window !== 'undefined' && window.localStorage.getItem(key);
@@ -16,9 +25,11 @@ export default (key, initialValue) => {
       setStoredValue(valueToStore);
       window.localStorage.setItem(key, JSON.stringify(valueToStore));
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
   };
 
   return [storedValue, setValue];
-};
+}
+
+export default useStorage;
