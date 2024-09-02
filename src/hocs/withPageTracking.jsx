@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { ENTITY_CONTENT, PAGE_EVENTS_DEFAULT, PAGE_EVENTS_PDP } from '@/data/constants';
 import { PageController, trackEntityPageViewEvent, trackPageViewEvent } from '@sitecore-search/react';
 
-import { ENTITY_CONTENT, PAGE_EVENTS_DEFAULT, PAGE_EVENTS_PDP } from '../data/constants';
-import useUri from '../hooks/useUri';
+import useUri from '@/hooks/useUri.jsx';
 
 export const PageEventContext = React.createContext({});
 /**
@@ -14,25 +14,26 @@ export const PageEventContext = React.createContext({});
  */
 const withPageTracking =
   (Component, pageType = PAGE_EVENTS_DEFAULT) =>
-    function InnerComponent(props) {
-      const uri = useUri();
-      const { id } = useParams();
+    // eslint-disable-next-line react/display-name
+  (props) => {
+    const uri = useUri();
+    const { id } = useParams();
 
-      useEffect(() => {
-        PageController.getContext().setPageUri(uri);
+    useEffect(() => {
+      PageController.getContext().setPageUri(uri);
 
-        if (id && pageType === PAGE_EVENTS_PDP) {
-          trackEntityPageViewEvent(ENTITY_CONTENT, { items: [{ id }], actionSubtype: 'conversion' });
-        } else {
-          trackPageViewEvent(pageType);
-        }
-      }, [uri, id]);
+      if (id && pageType === PAGE_EVENTS_PDP) {
+        trackEntityPageViewEvent(ENTITY_CONTENT, { items: [{ id }] });
+      } else {
+        trackPageViewEvent(pageType);
+      }
+    }, [uri, id]);
 
-      return (
-        <PageEventContext.Provider value={pageType}>
-          <Component {...{ props }} />
-        </PageEventContext.Provider>
-      );
-    };
+    return (
+      <PageEventContext.Provider value={pageType}>
+        <Component {...{ props }} />
+      </PageEventContext.Provider>
+    );
+  };
 
 export default withPageTracking;

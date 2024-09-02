@@ -1,57 +1,28 @@
-import { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, GridIcon, ListBulletIcon } from '@radix-ui/react-icons';
-import { Presence } from '@radix-ui/react-presence';
-import {
-  WidgetDataType,
-  useSearchResults,
-  widget,
-  useSearchResultsSelectedFilters,
-} from '@sitecore-search/react';
-import { AccordionFacets, CardViewSwitcher, Pagination, Select, SortSelect } from '@sitecore-search/ui';
-
-import { LanguageContext } from '../../contexts/languageContext';
-import { DEFAULT_IMAGE, HIGHLIGHT_DATA } from '../../data/constants';
-import { HighlightComponent, getDescription } from '../utils';
-import {
-  AccordionFacetsStyled,
-  ArticleCardRowStyled,
-  ArticleCardStyled,
-  CardViewSwitcherStyled,
-  FiltersStyled,
-  GridStyled,
-  LoaderAnimation,
-  LoaderContainer,
-  PageControlsStyled,
-  PaginationStyled,
-  QuerySummaryStyled,
-  RowStyled,
-  SearchResultsLayout,
-  SelectStyled,
-  SortSelectStyled,
-} from './styled';
+import ArticleItemCard from '@/widgets/components/ArticleCard';
+import ArticleHorizontalItemCard from '@/widgets/components/ArticleHorizontalCard';
+import CardViewSwitcher from '@/widgets/components/CardViewSwitcher';
+import Filter from '@/widgets/components/Filter';
+import QueryResultsSummary from '@/widgets/components/QueryResultsSummary';
+import ResultsPerPage from '@/widgets/components/ResultsPerPage';
+import SearchFacets from '@/widgets/components/SearchFacets';
+import SearchPagination from '@/widgets/components/SearchPagination';
+import SortOrder from '@/widgets/components/SortOrder';
+import Spinner from '@/widgets/components/Spinner';
+import { GridIcon, ListBulletIcon } from '@radix-ui/react-icons';
+import { WidgetDataType, useSearchResults, widget } from '@sitecore-search/react';
 import PropTypes from 'prop-types';
 
-
-export const SearchResultsWithLayoutOptionComponent = ({
- defaultSortType = 'featured_desc',
- defaultPage = 1,
- defaultKeyphrase = '',
- defaultItemsPerPage = 24,
+export const SearchResultsComponent = ({
+  defaultSortType = 'featured_desc',
+  defaultPage = 1,
+  defaultKeyphrase = '',
+  defaultItemsPerPage = 10,
 }) => {
-  const { language } = useContext(LanguageContext);
-  const navigate = useNavigate();
   const {
     widgetRef,
-    actions: {
-      onResultsPerPageChange,
-      onPageNumberChange,
-      onItemClick,
-      onRemoveFilter,
-      onSortChange,
-      onFacetClick,
-    },
+    actions: { onItemClick },
     state: { sortType, page, itemsPerPage },
     queryResult: {
       isLoading,
@@ -64,300 +35,109 @@ export const SearchResultsWithLayoutOptionComponent = ({
       } = {},
     },
   } = useSearchResults({
-    query: (query) => {
-    query
-    .getRequest()
-    .setSearchQueryHighlightFragmentSize(500)
-    .setSearchQueryHighlightFields(['subtitle', 'description'])
-    .setSearchQueryHighlightPreTag(HIGHLIGHT_DATA.pre)
-    .setSearchQueryHighlightPostTag(HIGHLIGHT_DATA.post);
-  },
     state: {
-    sortType: defaultSortType,
+      sortType: defaultSortType,
       page: defaultPage,
       itemsPerPage: defaultItemsPerPage,
       keyphrase: defaultKeyphrase,
-  },
-});
-  const totalPages = Math.ceil(totalItems / (itemsPerPage !== 0 ? itemsPerPage : 1));
-  const selectedSortIndex = sortChoices.findIndex((s) => s.name === sortType);
-  const selectedFacetsFromApi = useSearchResultsSelectedFilters();
-  const defaultCardView = CardViewSwitcher.CARD_VIEW_LIST;
+    },
+  });
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const defaultCardView = 'list';
   const [dir, setDir] = useState(defaultCardView);
   const onToggle = (value = defaultCardView) => setDir(value);
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen w-full">
+        <Spinner loading />
+      </div>
+    );
+  }
   return (
-    <>
-      {isLoading && (
-        <LoaderContainer>
-          <Presence present={isLoading}>
-            <LoaderAnimation
-              aria-busy={isLoading}
-              aria-hidden={!isLoading}
-              focusable="false"
-              role="progressbar"
-              viewBox="0 0 20 20"
-            >
-              <path d="M7.229 1.173a9.25 9.25 0 1 0 11.655 11.412 1.25 1.25 0 1 0-2.4-.698 6.75 6.75 0 1 1-8.506-8.329 1.25 1.25 0 1 0-.75-2.385z" />
-            </LoaderAnimation>
-          </Presence>
-        </LoaderContainer>
-      )}
-      {!isLoading && (
-        <SearchResultsLayout.MainArea ref={widgetRef}>
-          <SearchResultsLayout.MainArea>
-            {isFetching && (
-              <LoaderContainer>
-                <Presence present={true}>
-                  <LoaderAnimation
-                    aria-busy={true}
-                    aria-hidden={false}
-                    focusable="false"
-                    role="progressbar"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M7.229 1.173a9.25 9.25 0 1 0 11.655 11.412 1.25 1.25 0 1 0-2.4-.698 6.75 6.75 0 1 1-8.506-8.329 1.25 1.25 0 1 0-.75-2.385z" />
-                  </LoaderAnimation>
-                </Presence>
-              </LoaderContainer>
-            )}
-            {totalItems > 0 && (
-              <>
-                <SearchResultsLayout.LeftArea>
+    <div ref={widgetRef}>
+      <div className="flex relative max-w-full px-4 text-black dark:text-gray-100 text-opacity-75">
+        {isFetching && (
+          <div className="w-full h-full fixed top-0 left-0 bottom-0 right-0 z-30 bg-white dark:bg-gray-800 opacity-50">
+            <div className="absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%] flex flex-col justify-center items-center z-40">
+              <Spinner loading />
+            </div>
+          </div>
+        )}
+        {totalItems > 0 && (
+          <>
+            <section className="flex flex-col flex-none relative mt-4 mr-8 w-[25%]">
+              <Filter />
 
-                  {selectedFacetsFromApi.map((selectedFacet) => (
-                    <FiltersStyled.SelectedFiltersListItem
-                      key={`${selectedFacet.facetId}${selectedFacet.facetLabel}${selectedFacet.valueLabel}`}
-                    >
-                      <FiltersStyled.SelectedFiltersListItemText>
-                        {selectedFacet.facetLabel}: {selectedFacet.valueLabel}
-                      </FiltersStyled.SelectedFiltersListItemText>
-                      <FiltersStyled.SelectedFiltersListItemButton onClick={() => onRemoveFilter(selectedFacet)}>
-                        X
-                      </FiltersStyled.SelectedFiltersListItemButton>
-                    </FiltersStyled.SelectedFiltersListItem>
+              <SearchFacets facets={facets} />
+            </section>
+            <section className="flex flex-col flex-[4_1_0%]">
+              {/* Sort Select */}
+              <section className="flex justify-between text-xs">
+                {totalItems > 0 && (
+                  <QueryResultsSummary
+                    currentPage={page}
+                    itemsPerPage={itemsPerPage}
+                    totalItems={totalItems}
+                    totalItemsReturned={articles.length}
+                  />
+                )}
+                <div>
+                  <CardViewSwitcher
+                    onToggle={onToggle}
+                    defaultCardView={defaultCardView}
+                    GridIcon={GridIcon}
+                    ListIcon={ListBulletIcon}
+                  />
+                  <SortOrder options={sortChoices} selected={sortType} />
+                </div>
+              </section>
+
+              {/* Results */}
+              {dir === 'grid' ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 md:gap-x-5 xl:gap-x-6 gap-y-3 xl:gap-y-4 ">
+                  {articles.map((a, index) => (
+                    <ArticleItemCard key={a.id} article={a} index={index} onItemClick={onItemClick} />
                   ))}
-                  <AccordionFacetsStyled.Root
-                    defaultFacetTypesExpandedList={[]}
-                    onFacetTypesExpandedListChange={() => {}}
-                    onFacetValueClick={onFacetClick}
-                  >
-                    {facets.map((f) => (
-                      <AccordionFacetsStyled.Facet facetId={f.name} key={f.name}>
-                        <AccordionFacetsStyled.Header>
-                          <AccordionFacetsStyled.Trigger>{f.label}</AccordionFacetsStyled.Trigger>
-                        </AccordionFacetsStyled.Header>
-                        <AccordionFacets.Content>
-                          <AccordionFacetsStyled.ValueList>
-                            {f.value.map((v, index) => (
-                              <AccordionFacetsStyled.Item {...{ index, facetValueId: v.id }} key={v.id}>
-                                <AccordionFacetsStyled.ItemCheckbox>
-                                  <AccordionFacetsStyled.ItemCheckboxIndicator>
-                                    <CheckIcon />
-                                  </AccordionFacetsStyled.ItemCheckboxIndicator>
-                                </AccordionFacetsStyled.ItemCheckbox>
-                                <AccordionFacetsStyled.ItemCheckboxLabel>
-                                  {v.text} {v.count && `(${v.count})`}
-                                </AccordionFacetsStyled.ItemCheckboxLabel>
-                              </AccordionFacetsStyled.Item>
-                            ))}
-                          </AccordionFacetsStyled.ValueList>
-                        </AccordionFacets.Content>
-                      </AccordionFacetsStyled.Facet>
-                    ))}
-                  </AccordionFacetsStyled.Root>
-                </SearchResultsLayout.LeftArea>
-                <SearchResultsLayout.RightArea>
-                  <SearchResultsLayout.RightTopArea>
-                    {totalItems && (
-                      <QuerySummaryStyled>
-                        <b>
-                          Showing {itemsPerPage * (page - 1) + 1} - {itemsPerPage * (page - 1) + articles.length} of{' '}
-                          {totalItems} results
-                        </b>
-                      </QuerySummaryStyled>
-                    )}
+                </div>
+              ) : (
+                <div className="w-full">
+                  {articles.map((a, index) => (
+                    <ArticleHorizontalItemCard
+                      key={a.id}
+                      article={a}
+                      index={index}
+                      onItemClick={onItemClick}
+                      displayText={true}
+                    />
+                  ))}
+                </div>
+              )}
 
-                    <SearchResultsLayout.Toolbar>
-                      {/* Card View Switcher */}
-                      <CardViewSwitcherStyled.Root onValueChange={onToggle} defaultValue={defaultCardView}>
-                        <CardViewSwitcherStyled.Item value="grid" aria-label="Grid View">
-                          <GridIcon />
-                        </CardViewSwitcherStyled.Item>
-                        <CardViewSwitcherStyled.Item value="list" aria-label="List View">
-                          <ListBulletIcon />
-                        </CardViewSwitcherStyled.Item>
-                      </CardViewSwitcherStyled.Root>
-
-                      {/* Sort Select */}
-                      <SortSelect.Root defaultValue={sortChoices[selectedSortIndex]?.name} onValueChange={onSortChange}>
-                        <SortSelectStyled.Trigger>
-                          <SortSelectStyled.SelectValue>
-                            {selectedSortIndex > -1 ? sortChoices[selectedSortIndex].label : ''}
-                          </SortSelectStyled.SelectValue>
-                          <SortSelectStyled.Icon />
-                        </SortSelectStyled.Trigger>
-                        <SortSelectStyled.Content>
-                          <SortSelectStyled.Viewport>
-                            {sortChoices.map((option) => (
-                              <SortSelectStyled.Option value={option} key={`${option.label}@${language}`}>
-                                <SortSelectStyled.OptionText>{option.label}</SortSelectStyled.OptionText>
-                              </SortSelectStyled.Option>
-                            ))}
-                          </SortSelectStyled.Viewport>
-                        </SortSelectStyled.Content>
-                      </SortSelect.Root>
-                    </SearchResultsLayout.Toolbar>
-                  </SearchResultsLayout.RightTopArea>
-
-                  {/* Results */}
-                  {dir === CardViewSwitcher.CARD_VIEW_GRID ? (
-                    <GridStyled>
-                      {articles.map((a, index) => (
-                        <ArticleCardStyled.Root key={`${a.id}@${a.source_id}@${language}`}>
-                          <ArticleCardStyled.ImageWrapper>
-                            <ArticleCardStyled.Image src={a.image_url || a.image || DEFAULT_IMAGE} />
-                          </ArticleCardStyled.ImageWrapper>
-                          <ArticleCardStyled.Title>
-                            <ArticleCardStyled.Link
-                              title={a.title}
-                              to={`/detail/${a.id}`}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                onItemClick({ id: a.id || '', index });
-                                navigate(`/detail/${a.id}`);
-                              }}
-                            >
-                              {a.title}
-                            </ArticleCardStyled.Link>
-                          </ArticleCardStyled.Title>
-                          <ArticleCardStyled.Subtitle>
-                            <HighlightComponent
-                              text={getDescription(a, 'subtitle')}
-                              preSeparator={HIGHLIGHT_DATA.pre}
-                              postSeparator={HIGHLIGHT_DATA.post}
-                              highlightElement={HIGHLIGHT_DATA.highlightTag}
-                            />
-                          </ArticleCardStyled.Subtitle>
-                          <ArticleCardStyled.Type>{a.type ? a.type : 'Unknown'}</ArticleCardStyled.Type>
-                        </ArticleCardStyled.Root>
-                      ))}
-                    </GridStyled>
-                  ) : (
-                    <RowStyled>
-                      {articles.map((a, index) => (
-                        <ArticleCardRowStyled.Root key={`${a.id}@${a.source_id}@${language}`}>
-                          <ArticleCardRowStyled.Left>
-                            <ArticleCardRowStyled.Image src={a.image_url || a.image || DEFAULT_IMAGE} />
-                          </ArticleCardRowStyled.Left>
-                          <ArticleCardRowStyled.Right>
-                            <ArticleCardRowStyled.Title>
-                              <ArticleCardRowStyled.Link
-                                to={`/detail/${a.id}`}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  onItemClick({ id: a.id || '', index });
-                                  navigate(`/detail/${a.id}`);
-                                }}
-                              >
-                                {a.title}
-                              </ArticleCardRowStyled.Link>
-                            </ArticleCardRowStyled.Title>
-                            <ArticleCardRowStyled.Content>
-                              <HighlightComponent
-                                text={getDescription(a, 'description')}
-                                preSeparator={HIGHLIGHT_DATA.pre}
-                                postSeparator={HIGHLIGHT_DATA.post}
-                                highlightElement={HIGHLIGHT_DATA.highlightTag}
-                              />
-                            </ArticleCardRowStyled.Content>
-                            <ArticleCardRowStyled.Type>{a.type ? a.type : 'Unknown'}</ArticleCardRowStyled.Type>
-                          </ArticleCardRowStyled.Right>
-                        </ArticleCardRowStyled.Root>
-                      ))}
-                    </RowStyled>
-                  )}
-                  <PageControlsStyled>
-                    <div>
-                      <label>Results Per Page</label>
-                      <Select.Root
-                        defaultValue={String(defaultItemsPerPage)}
-                        onValueChange={(v) => onResultsPerPageChange({ numItems: Number(v) })}
-                      >
-                        <SelectStyled.Trigger>
-                          <SelectStyled.SelectValue />
-                          <SelectStyled.Icon />
-                        </SelectStyled.Trigger>
-                        <SelectStyled.Content>
-                          <SelectStyled.Viewport>
-                            <SelectStyled.Option value="24">
-                              <SelectStyled.OptionText>24</SelectStyled.OptionText>
-                            </SelectStyled.Option>
-
-                            <SelectStyled.Option value="48">
-                              <SelectStyled.OptionText>48</SelectStyled.OptionText>
-                            </SelectStyled.Option>
-
-                            <SelectStyled.Option value="64">
-                              <SelectStyled.OptionText>64</SelectStyled.OptionText>
-                            </SelectStyled.Option>
-                          </SelectStyled.Viewport>
-                        </SelectStyled.Content>
-                      </Select.Root>
-                    </div>
-                    <PaginationStyled.Root
-                      currentPage={page}
-                      defaultCurrentPage={1}
-                      totalPages={totalPages}
-                      onPageChange={(v) => onPageNumberChange({ page: v })}
-                    >
-                      <PaginationStyled.PrevPage onClick={(e) => e.preventDefault()}>
-                        <ArrowLeftIcon />
-                      </PaginationStyled.PrevPage>
-                      <PaginationStyled.Pages>
-                        {(pagination) =>
-                          Pagination.paginationLayout(pagination, {}).map(({ page, type }) =>
-                            type === 'page' ? (
-                              <PaginationStyled.Page
-                                key={page}
-                                aria-label={`Page ${page}`}
-                                page={page}
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                {page}
-                              </PaginationStyled.Page>
-                            ) : (
-                              <span key={type}>...</span>
-                            ),
-                          )
-                        }
-                      </PaginationStyled.Pages>
-                      <PaginationStyled.NextPage onClick={(e) => e.preventDefault()}>
-                        <ArrowRightIcon />
-                      </PaginationStyled.NextPage>
-                    </PaginationStyled.Root>
-                  </PageControlsStyled>
-                </SearchResultsLayout.RightArea>
-              </>
-            )}
-          </SearchResultsLayout.MainArea>
-        </SearchResultsLayout.MainArea>
-      )}
-    </>
+              <div className="flex flex-col md:flex-row md:justify-between text-xs">
+                <ResultsPerPage defaultItemsPerPage={defaultItemsPerPage} />
+                <SearchPagination currentPage={page} totalPages={totalPages} />
+              </div>
+            </section>
+          </>
+        )}
+        {totalItems <= 0 && !isFetching && (
+          <div className="w-full flex justify-center">
+            <h3>0 Results</h3>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
-SearchResultsWithLayoutOptionComponent.propTypes = {
+SearchResultsComponent.propTypes = {
   defaultSortType: PropTypes.string,
   defaultPage: PropTypes.number,
-  defaultItemsPerPage: PropTypes.number,
   defaultKeyphrase: PropTypes.string,
+  defaultItemsPerPage: PropTypes.number,
+
 };
 
-const SearchResultsWithLayoutOptionWidget = widget(
-  SearchResultsWithLayoutOptionComponent,
-  WidgetDataType.SEARCH_RESULTS,
-  'content',
-);
-
-export default SearchResultsWithLayoutOptionWidget;
+const SearchResultsWidget = widget(SearchResultsComponent, WidgetDataType.SEARCH_RESULTS, 'content');
+export default SearchResultsWidget;
