@@ -9,6 +9,8 @@ import ArticleDetail from '@/pages/ArticleDetail.jsx';
 import Home from '@/pages/Home.jsx';
 import Search from '@/pages/Search.jsx';
 import { SEOWidget, WidgetsProvider } from '@sitecore-search/react';
+import { useAccessToken } from './hooks/useAccessToken';
+import { useEffect } from 'react';
 
 /**
  * Configuration object for search settings.
@@ -25,6 +27,13 @@ console.log(SEARCH_CONFIG);
 
 function App() {
   const { language, setLanguage } = useLanguage();
+  const { accessToken, refreshToken } = useAccessToken();
+
+  useEffect(() => {
+    if (!accessToken)
+      refreshToken();
+  }, [accessToken, refreshToken]);
+
   return (
     <>
       <LanguageContext.Provider value={{ language, setLanguage }}>
@@ -35,7 +44,8 @@ function App() {
             <WidgetsProvider
               env={SEARCH_CONFIG.env}
               customerKey={SEARCH_CONFIG.customerKey}
-              apiKey={SEARCH_CONFIG.apiKey}
+              apiKey={`Bearer ${accessToken}`}
+              requestMiddleware={refreshToken}
               publicSuffix={true}
             >
               <SEOWidget rfkId={'demo_search_seo'} />
