@@ -98,7 +98,7 @@ To start using `Sitecore Search Starter Kit`:
 ```
 VITE_SEARCH_ENV=<environment - Expected values: prod, staging or prodEu >
 VITE_SEARCH_CUSTOMER_KEY=<customer key>
-VITE_SEARCH_API_KEY=<API key provided in CEC or Acccess Token>
+VITE_SEARCH_API_KEY=<API key provided in CEC>
 VITE_SEARCH_PATH=<Path for the site> (optional)
 ```
 
