@@ -21,6 +21,7 @@ integrates with Sitecore Search services and supports event tracking.
 
 - [Prerequisites](#prerequisites)
 - [Quick start](#quick-start)
+- [Widget Provider & Middleware](#widget-provider--middleware)
 - [Pages](#Pages)
     - [Home](#Home)
     - [Search](#Search)
@@ -104,6 +105,40 @@ VITE_SEARCH_PATH=<Path for the site> (optional)
 5.  To start the development server, run `npm run dev`.
 6.  To view the site, open your browser to **http://localhost:5173**
 7.  To build the app for production, run: `npm run build`
+
+## Widget Provider & Middleware
+
+`WidgetsProvider` from `@sitecore-search/react` wraps your app and supplies auth config to all child widgets. The `requestMiddleware` prop accepts an async function that runs **before each SDK request**, making it the right place to refresh an expiring token.
+
+```jsx
+import { WidgetsProvider } from '@sitecore-search/react';
+
+<WidgetsProvider
+  ...
+  apiKey={`Bearer ${accessToken}`}
+  requestMiddleware={refreshToken}
+  ...
+>
+  {/* widgets */}
+</WidgetsProvider>
+```
+
+`refreshToken` here is the middleware function. It checks whether the current JWT has expired and, if so, fetches a new access token before the SDK sends the request:
+
+```js
+// hooks/useAccessToken.js
+const refreshToken = useCallback(async () => {
+  await requestDecorator();            // checks expiry, calls token endpoint if needed
+  setAccessToken(TokenService.getAccessToken());
+}, [setAccessToken]);
+```
+
+The token logic lives in `src/utils/requestDecorator.js` and `src/services/TokenService.js`:
+- On first load a `POST /token` call obtains both an **access token** and a **refresh token**.
+- On subsequent calls a `PUT /token` call exchanges the refresh token for a new access token.
+- Expired / invalid refresh tokens are cleared so the app re-authenticates cleanly.
+
+To wire up your own middleware, pass any `async () => void` function to `requestMiddleware`. The SDK awaits it before dispatching the underlying API call.
 
 ## Pages
 
