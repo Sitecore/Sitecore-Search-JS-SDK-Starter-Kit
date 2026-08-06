@@ -23,8 +23,6 @@ const SEARCH_CONFIG = {
   apiKey: import.meta.env.VITE_SEARCH_API_KEY,
 };
 
-console.log(SEARCH_CONFIG);
-
 function App() {
   const { language, setLanguage } = useLanguage();
   const { accessToken, refreshToken } = useAccessToken();
@@ -34,11 +32,20 @@ function App() {
       refreshToken();
   }, [accessToken, refreshToken]);
 
+  if (!accessToken) {
+    return null;
+  }
+
   return (
     <>
       <LanguageContext.Provider value={{ language, setLanguage }}>
 
-      <BrowserRouter>
+      <BrowserRouter basename={
+          (() => {
+            const p = import.meta.env.VITE_SEARCH_PATH || '';
+            return p && window.location.pathname.startsWith(p) ? p : '/';
+          })()
+        }>
           <div className="bg-white dark:bg-gray-700">
 
             <WidgetsProvider
