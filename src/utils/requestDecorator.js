@@ -44,9 +44,6 @@ export const tryRefreshAccessToken = async () => {
     else {
       const res = await fetch(`${API_URL}/sdk-demo-auth/v1/token`, {
         method: 'POST',
-         headers: {
-          'x-api-key': `01-7d9f1d77-08a8c0df618d45c6cdce99a1b2102a6f04331e02`,
-        },
       });
       const data = await res.json();
       if (res.ok) {
